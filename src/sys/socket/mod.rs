@@ -1616,7 +1616,7 @@ pub fn recvmmsg<'a, I, S>(
             }
         );
 
-        (msg_controllen as usize, &mut d.cmsg_buffer)
+        msg_controllen as usize
     }).collect();
 
     let timeout = if let Some(mut t) = timeout {
@@ -1634,36 +1634,29 @@ pub fn recvmmsg<'a, I, S>(
         .take(ret as usize)
         .zip(addresses.iter().map(|addr| unsafe{addr.assume_init()}))
         .zip(results.into_iter())
-        .map(|((mmsghdr, address), (msg_controllen, cmsg_buffer))| {
+        .map(|((mmsghdr, address), msg_controllen)| {
             unsafe {
                 read_mhdr(
                     mmsghdr.msg_hdr,
                     mmsghdr.msg_len as isize,
                     msg_controllen,
                     address,
-                    cmsg_buffer
                 )
             }
         })
         .collect())
 }
 
-unsafe fn read_mhdr<'a, 'b, S>(
+unsafe fn read_mhdr<'a, S>(
     mhdr: msghdr,
     r: isize,
     msg_controllen: usize,
     address: S,
-    cmsg_buffer: &'a mut Option<&'b mut Vec<u8>>
-) -> RecvMsg<'b, S>
+) -> RecvMsg<'a, S>
     where S: SockaddrLike
 {
     let cmsghdr = {
         if mhdr.msg_controllen > 0 {
-            // got control message(s)
-            cmsg_buffer
-                .as_mut()
-                .unwrap()
-                .set_len(mhdr.msg_controllen as usize);
             debug_assert!(!mhdr.msg_control.is_null());
             debug_assert!(msg_controllen >= mhdr.msg_controllen as usize);
             CMSG_FIRSTHDR(&mhdr as *const msghdr)
@@ -1794,7 +1787,7 @@ pub fn recvmsg<'a, 'outer, 'inner, S>(fd: RawFd, iov: &'outer mut [IoSliceMut<'i
 
     let r = Errno::result(ret)?;
 
-    Ok(unsafe { read_mhdr(mhdr, r, msg_controllen, address.assume_init(), &mut cmsg_buffer) })
+    Ok(unsafe { read_mhdr(mhdr, r, msg_controllen, address.assume_init()) })
 }
 }
 
