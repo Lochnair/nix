@@ -221,6 +221,14 @@ pub enum SockProtocol {
     #[cfg(any(target_os = "android", target_os = "linux"))]
     #[cfg_attr(docsrs, doc(cfg(all())))]
     EthAll = libc::ETH_P_ALL.to_be(),
+    /// Allow ICMP packets
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg_attr(docsrs, doc(cfg(all())))]
+    ICMP = libc::IPPROTO_ICMP,
+    /// Allow ICMPv6 packets
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg_attr(docsrs, doc(cfg(all())))]
+    ICMPV6 = libc::IPPROTO_ICMPV6,
 }
 
 #[cfg(any(target_os = "linux"))]
