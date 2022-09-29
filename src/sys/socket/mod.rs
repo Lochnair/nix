@@ -96,6 +96,8 @@ pub use libc::{c_uint, CMSG_SPACE};
 #[cfg(feature = "net")]
 use crate::sys::socket::addr::{ipv4addr_to_libc, ipv6addr_to_libc};
 
+use modular_bitfield::prelude::*;
+
 /// These constants are used to specify the communication semantics
 /// when creating a socket with [`socket()`](fn.socket.html)
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -2207,6 +2209,82 @@ pub fn sockaddr_storage_to_addr(
     }
 }
 
+#[bitfield]
+#[derive(Clone, Copy, Debug)]
+pub struct TcpInfo {
+    pub tcpi_state: u8,
+    pub tcpi_ca_state: u8,
+    pub tcpi_retransmits: u8,
+    pub tcpi_probes: u8,
+    pub tcpi_backoff: u8,
+    pub tcpi_options: u8,
+    pub tcpi_snd_wscale: B4,
+    pub tcpi_rcv_wscale: B4,
+    pub tcpi_delivery_rate_app_limited: bool,
+
+    pub tcpi_rto: u32,
+    pub tcpi_ato: u32,
+    pub tcpi_snd_mss: u32,
+    pub tcpi_rcv_mss: u32,
+
+    pub tcpi_unacked: u32,
+    pub tcpi_sacked: u32,
+    pub tcpi_lost: u32,
+    pub tcpi_retrans: u32,
+    pub tcpi_fackets: u32,
+
+    /* Times. */
+    pub tcpi_last_data_sent: u32,
+    pub tcpi_last_ack_sent: u32,
+    pub tcpi_last_data_recv: u32,
+    pub tcpi_last_ack_recv: u32,
+
+    /* Metrics. */
+    pub tcpi_pmtu: u32,
+    pub tcpi_rcv_ssthresh: u32,
+    pub tcpi_rtt: u32,
+    pub tcpi_rttvar: u32,
+    pub tcpi_snd_ssthresh: u32,
+    pub tcpi_snd_cwnd: u32,
+    pub tcpi_advmss: u32,
+    pub tcpi_reordering: u32,
+
+    pub tcpi_rcv_rtt: u32,
+    pub tcpi_rcv_space: u32,
+
+    pub tcpi_total_retrans: u32,
+
+    pub tcpi_pacing_rate: u64,
+    pub tcpi_max_pacing_rate: u64,
+    pub tcpi_bytes_acked: u64,
+    pub tcpi_bytes_received: u64,
+    pub tcpi_segs_out: u32,
+    pub tcpi_segs_in: u32,
+
+    pub tcpi_notsent_bytes: u32,
+    pub tcpi_min_rtt: u32,
+    pub tcpi_data_segs_in: u32,
+    pub tcpi_data_segs_out: u32,
+
+    pub tcpi_delivery_rate: u64,
+
+    pub tcpi_busy_time: u64,
+    pub tcpi_rwnd_limited: u64,
+    pub tcpi_sndbuf_limited: u64,
+
+    pub tcpi_delivered: u32,
+    pub tcpi_delivered_ce: u32,
+
+    pub tcpi_bytes_sent: u64,
+    pub tcpi_bytes_retrans: u64,
+    pub tcpi_dsack_dups: u32,
+    pub tcpi_reord_seen: u32,
+
+    // modular-bitfield requires the struct to be N * bytes
+    // add some padding at the end to satisfy the requirement
+    #[allow(unused)]
+    padding: B7,
+}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Shutdown {

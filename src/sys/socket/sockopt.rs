@@ -648,6 +648,14 @@ sockopt_impl!(
 sockopt_impl!(
     /// Set "don't fragment packet" flag on the IPv6 packet.
     Ipv6DontFrag, Both, libc::IPPROTO_IPV6, libc::IPV6_DONTFRAG, bool);
+#[cfg(any(
+target_os = "android",
+target_os = "linux",
+))]
+#[cfg(feature = "net")]
+sockopt_impl!(
+    /// Get TCP statistics
+    TcpInfo, GetOnly, libc::SOL_TCP, libc::TCP_INFO, super::TcpInfo);
 
 #[allow(missing_docs)]
 // Not documented by Linux!
